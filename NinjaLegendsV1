@@ -1,0 +1,306 @@
+if game.PlaceId == 3956818381 then
+
+local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
+local Window = OrionLib:MakeWindow({Name = "Ninja Legends", HidePremium = false, IntroText = "Nieves Orion", SaveConfig = true, ConfigFolder = "Nieves Orion"})
+
+local Tab = Window:MakeTab({
+	Name = "General",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+	Name = "Farm"
+})
+
+local autoTapEnabled = false
+
+Tab:AddToggle({
+    Name = "Auto Tap",
+    Default = false,
+    Callback = function(Value)
+        autoTapEnabled = Value
+        if autoTapEnabled then
+            while autoTapEnabled do
+                local args = {
+                    [1] = "swingKatana"
+                }
+                game:GetService("Players").LocalPlayer.ninjaEvent:FireServer(unpack(args))
+                wait() -- You can adjust the wait time if needed
+            end
+        end
+    end    
+})
+
+OrionLib:Init()
+
+local toggleActive = false
+local toggleActive = false
+local running = false
+
+Tab:AddToggle({
+    Name = "Auto Sell",
+    Default = false,
+    Callback = function(Value)
+        toggleActive = Value
+        if toggleActive and not running then
+            running = true
+            -- Start the loop in a separate thread
+            spawn(function()
+                while toggleActive do
+                    wait()
+                    local pHead = game.Players.LocalPlayer.Character.Head
+                    for i, v in pairs(workspace.sellAreaCircles:GetChildren()[20].circleInner:GetDescendants()) do
+                        if v.Name == "TouchInterest" and v.Parent then
+                            firetouchinterest(pHead, v.Parent, 0)
+                            wait(0.1)
+                            firetouchinterest(pHead, v.Parent, 1)
+                            break
+                        end
+                    end
+                end
+                running = false
+            end)
+        elseif not toggleActive and running then
+            running = false
+        end
+    end    
+})
+
+OrionLib:Init()
+
+local isAutoFarming = false -- Variable to track the auto farming state
+
+Tab:AddToggle({
+    Name = "Auto Farm Chi",
+    Default = false,
+    Callback = function(Value)
+        isAutoFarming = Value -- Update the state based on the toggle
+
+        if isAutoFarming then
+            -- Start the auto farming loop when the toggle is enabled
+            while isAutoFarming do
+                wait(0.3) -- Wait for 0.3 seconds
+                local player = game.Players.LocalPlayer -- Get the local player
+                local character = player.Character or player.CharacterAdded:Wait() -- Wait for the character to load
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart") -- Get the HumanoidRootPart for teleportation
+
+                local valley = workspace.spawnedCoins.Valley -- Reference to the Valley
+                local chis = {} -- Table to hold chi
+
+                -- Loop through all children in the Valley
+                for _, item in ipairs(valley:GetChildren()) do
+                    if string.find(item.Name, "Chi") then -- Check if the item's name contains "Chi"
+                        table.insert(chis, item) -- Add to chis table
+                    end
+                end
+
+                if #chis > 0 then
+                    -- Get a random index
+                    local randomIndex = math.random(1, #chis)
+                    local selectedChi = chis[randomIndex] -- Select a random chi
+                    
+                    -- Teleport to the selected chi
+                    humanoidRootPart.CFrame = selectedChi.CFrame + Vector3.new(0, 3, 0) -- Adjust height if needed
+                else
+                    print("No chi found.")
+                end
+            end
+        end
+    end    
+})
+
+-- Initialize OrionLib
+OrionLib:Init()
+
+local teleporting = false -- Variable to track if teleportation is active
+
+Tab:AddToggle({
+    Name = "Auto Farm Coin",
+    Default = false,
+    Callback = function(Value)
+        teleporting = Value -- Update the teleporting state based on the toggle
+
+        if teleporting then
+            -- Start the teleportation loop
+            while teleporting do
+                wait(0.3) -- Wait for 0.3 seconds
+                local player = game.Players.LocalPlayer -- Get the local player
+                local character = player.Character or player.CharacterAdded:Wait() -- Wait for the character to load
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart") -- Get the HumanoidRootPart for teleportation
+
+                -- Function to teleport to a random coin
+                local function teleportToRandomCoin()
+                    local valley = workspace.spawnedCoins.Valley -- Reference to the Valley
+                    local coins = {} -- Table to hold coins
+
+                    -- Loop through all children in the Valley
+                    for _, item in ipairs(valley:GetChildren()) do
+                        if string.find(item.Name, "Coin") then -- Check if the item's name contains "Coin"
+                            table.insert(coins, item) -- Add to coins table
+                        end
+                    end
+
+                    if #coins > 0 then
+                        -- Get a random index
+                        local randomIndex = math.random(1, #coins)
+                        local selectedCoin = coins[randomIndex] -- Select a random coin
+                        
+                        humanoidRootPart.CFrame = selectedCoin.CFrame + Vector3.new(0, 3, 0) -- Adjust height if needed
+                    else
+                        print("No coins found.")
+                    end
+                end
+
+                teleportToRandomCoin()
+            end
+        end
+    end    
+})
+
+OrionLib:Init()
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+
+local function freezeCharacter()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 0
+        humanoid.PlatformStand = true
+        
+        -- Ensure the character's animations are not disrupted
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("MeshPart") or part:IsA("Part") then
+                part.Anchored = true
+            end
+        end
+    end
+end
+
+local function unfreezeCharacter()
+    local humanoid = character:FindFirstChildOfClass("Humanoid")
+    if humanoid then
+        humanoid.WalkSpeed = 16 -- Default WalkSpeed
+        humanoid.PlatformStand = false
+        
+        -- Restore the character's parts
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("MeshPart") or part:IsA("Part") then
+                part.Anchored = false
+            end
+        end
+    end
+end
+
+Tab:AddToggle({
+    Name = "Freeze Character",
+    Default = false,
+    Callback = function(Value)
+        -- Ensure the character is still valid
+        character = player.Character or player.CharacterAdded:Wait()
+        
+        if Value then
+            freezeCharacter()
+        else
+            unfreezeCharacter()
+        end
+    end    
+})
+
+OrionLib:Init()
+
+local Tab = Window:MakeTab({
+	Name = "Teleport",
+	Icon = "rbxassetid://4483345998",
+	PremiumOnly = false
+})
+
+local Section = Tab:AddSection({
+	Name = "Place"
+})
+
+Tab:AddButton({
+    Name = "Unlock All Islands",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        local rootPart = player.Character.HumanoidRootPart
+        local oldCFrame = rootPart.CFrame
+
+        local islands = {
+            "Ancient Inferno Island",
+            "Astral Island",
+            "Blazing Vortex Island",
+            "Chaos Legends Island",
+            "Cybernetic Legends Island",
+            "Dark Elements Island",
+            "Dragon Legend Island",
+            "Enchanted Island",
+            "Eternal Island",
+            "Golden Master Island",
+            "Inner Peace Island",
+            "Midnight Shadow Island",
+            "Mystical Island",
+            "Mythical Souls Island",
+            "Sandstorm",
+            "Skystorm Ultraus Island",
+            "Soul Fusion Island",
+            "Space Island",
+            "Thunderstorm",
+            "Tundra Island",
+            "Winter Wonder Island"
+        }
+
+        for _, islandName in ipairs(islands) do
+            rootPart.CFrame = CFrame.new(workspace.islandUnlockParts[islandName].Position)
+            wait(0.5)
+        end
+
+        rootPart.CFrame = oldCFrame
+    end    
+})
+
+OrionLib:Init()
+
+local Dropdown = Tab:AddDropdown({
+    Name = "Dropdown",
+    Default = "None",
+    Options = {
+        "None", "Ancient Inferno Island", "Astral Island", "Blazing Vortex Island", "Chaos Legends Island", 
+        "Cybernetic Legends Island", "Dark Elements Island", "Dragon Legend Island", "Enchanted Island", 
+        "Eternal Island", "Golden Master Island", "Inner Peace Island", "Midnight Shadow Island", "Mystical Island", 
+        "Mythical Souls Island", "Sandstorm", "Skystorm Ultraus Island", "Soul Fusion Island", 
+        "Space Island", "Thunderstorm", "Tundra Island", "Winter Wonder Island"
+    },
+    Callback = function(Value)
+        local player = game.Players.LocalPlayer
+        local character = player.Character
+        
+        -- Ensure the character and HumanoidRootPart exist
+        if character and character:FindFirstChild("HumanoidRootPart") then
+            local rootpart = character.HumanoidRootPart
+            
+            -- Check if the selected value is not "None"
+            if Value ~= "None" then
+                local targetPart = workspace.islandUnlockParts:FindFirstChild(Value)
+                
+                -- Check if the target part exists
+                if targetPart then
+                    rootpart.CFrame = CFrame.new(targetPart.Position)
+                else
+                    warn("Target part not found: " .. Value)
+                end
+            end
+        else
+            warn("Character or HumanoidRootPart not found.")
+        end
+    end    
+})
+
+-- Set the dropdown to a specific option
+Dropdown:Set("None") -- Change this to the desired option
+
+OrionLib:Init()
+
+end
